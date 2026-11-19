@@ -1,0 +1,77 @@
+---
+title: The context window
+description: The context window is the maximum number of tokens the model will take at one step.
+updated: 2026-11-19
+---
+
+The **context window** is the most text a model can take in at one time. It is counted in tokens: it is the maximum number of tokens the model will take at one step, where one step is the calculation that produces one new token. Anything outside the window is not part of that calculation.
+
+## The limit is counted in tokens
+
+For GPT-2 small, the context window is 1024 tokens. At each step, the model reads at most 1024 <Term id="tokens">tokens</Term>. There is no room for token number 1025.
+
+The limit is not counted in words or in characters. A token can be a whole word, part of a word, a space with a word, or a single punctuation mark. So the number of words on a page is not a reliable guide.
+
+Here is a small example, computed with GPT-2’s tokenizer:
+
+1. The sentence “Tokenization splits text.” has 3 words.
+2. The tokenizer splits it into `Token`, `ization`, ` splits`, ` text`, and `.`.
+3. That is 5 tokens.
+
+Three words became five tokens. Text with rare words, names, code, or many symbols usually needs more tokens per word than plain everyday text. A paragraph that looks short can still use a large share of the window.
+
+<Figure caption="GPT-2 small reads at most 1024 tokens at once">
+  <svg viewBox="0 0 600 190" width="100%" role="img" aria-label="A row of cells. A short bracket over the first five cells is labeled prompt. A bracket over the next three cells is labeled new tokens. A long bracket under the whole row is labeled 1024 tokens.">
+    <g stroke="currentColor" strokeWidth="1.5" fill="none">
+      <path d="M22,82 L22,72 L218,72 L218,82" />
+      <path d="M222,82 L222,72 L338,72 L338,82" />
+      <path d="M22,138 L22,148 L578,148 L578,138" />
+    </g>
+    <g fontSize="15" textAnchor="middle" fill="currentColor">
+      <text x="120" y="60">prompt</text>
+      <text x="280" y="60">new tokens</text>
+      <text x="300" y="174">1024 tokens</text>
+    </g>
+    <g stroke="currentColor" strokeWidth="1.5" fill="currentColor" fillOpacity="0.25">
+      <rect x="22" y="94" width="36" height="36" />
+      <rect x="62" y="94" width="36" height="36" />
+      <rect x="102" y="94" width="36" height="36" />
+      <rect x="142" y="94" width="36" height="36" />
+      <rect x="182" y="94" width="36" height="36" />
+    </g>
+    <g stroke="currentColor" strokeWidth="1.5" fill="currentColor" fillOpacity="0.1">
+      <rect x="222" y="94" width="36" height="36" />
+      <rect x="262" y="94" width="36" height="36" />
+      <rect x="302" y="94" width="36" height="36" />
+    </g>
+    <g stroke="currentColor" strokeWidth="1.5" fill="none">
+      <rect x="342" y="94" width="36" height="36" />
+      <rect x="382" y="94" width="36" height="36" />
+      <rect x="422" y="94" width="36" height="36" />
+      <rect x="502" y="94" width="36" height="36" />
+      <rect x="542" y="94" width="36" height="36" />
+    </g>
+    <text x="480" y="118" fontSize="16" textAnchor="middle" fill="currentColor">…</text>
+  </svg>
+</Figure>
+
+## The prompt and the new tokens share the window
+
+A GPT writes one token at a time. Each new token is added to the end of the text, and the next step reads everything again, including that new token. So the tokens the model writes take up positions in the same window as your prompt.
+
+Here is how that plays out with GPT-2 small and a prompt of 1000 tokens:
+
+1. Your prompt fills positions 1 to 1000.
+2. The model computes the next token. It goes into position 1001.
+3. The next step reads 1001 tokens and adds one more, at position 1002.
+4. After 24 new tokens, the window holds 1000 + 24 = 1024 tokens. It is full.
+
+At that point the model cannot take one more token. A program built around the model has two choices. It can stop writing. Or it can drop some tokens, usually the oldest ones at the start, to make room. Dropped tokens are not part of the next step at all.
+
+A fixed-size whiteboard is a fair comparison. To write a new line on a full board, you have to stop or erase something. The comparison stops at memory: a person still remembers what was erased, and the model’s calculation has nothing outside the window to draw on.
+
+## Position matters inside the window
+
+The order of tokens changes the meaning. “Dog bites man” and “man bites dog” use the same words in a different order. So the model needs to know where each token sits, not only which tokens are there.
+
+With each token, the model also receives its <Term id="text-becomes-numbers">position</Term>: first, second, third, and so on, up to the 1024th. GPT-2 small learned one position entry for each of those 1024 places during training, and it has none for a 1025th. That is one reason its limit is exactly 1024. The page on how text becomes numbers shows how the position is combined with each token.

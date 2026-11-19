@@ -1,0 +1,100 @@
+---
+title: GPT-2 and later models
+description: GPT-2 small is a public transformer this site can open. Later models keep that stack and change named pieces. A chat product adds training and serving around a model.
+updated: 2026-11-19
+---
+
+**GPT-2 small** is a public transformer this site can open. Later models keep that stack and change named pieces. A chat product adds training and serving around a model.
+
+Put plainly: GPT-2 small is a model whose file anyone can download and read. Newer models are built the same basic way, with a few parts swapped. A chat app you use is a model plus extra work wrapped around it.
+
+## What is public in GPT-2
+
+The weights and code for GPT-2 small are public. Weights are the model’s parameters, the numbers stored in its file. The code is the program that runs the forward pass with those numbers.
+
+Because both are public, every number can be looked at. The sizes are listed on the <Term id="config">GPT-2 config</Term> page: 12 layers, hidden size 768, 12 heads, and a vocabulary of 50257 tokens. The context length is 1024, so GPT-2 small reads at most 1024 tokens at once.
+
+The site’s explorer does not run GPT-2 small while you watch. It shows one traced sentence. A trace is a saved record of one run:
+
+1. One sentence is split into tokens.
+2. GPT-2 small runs its forward pass on those tokens once.
+3. The numbers at each step are written to a file.
+4. The explorer reads that file and draws it.
+
+So the explorer is a recording, not a live service. It cannot answer a new message.
+
+## A chat product is not the base model
+
+A base model is the model as it comes out of its first training. It continues text. Give it the start of a sentence, and it scores possible next tokens.
+
+A product such as ChatGPT adds three things around a model:
+
+1. **Further training.** More training teaches the model to reply in turns, as an assistant.
+2. **Serving.** Computers run the model for many people at once and send back the replies.
+3. **A transcript UI.** UI means user interface, the screen you type into. Here it is the chat window that shows your messages and the replies as one conversation.
+
+You can compare a base model to an engine on a test stand, and a chat product to a car built around it. The comparison breaks in one place: further training changes the model’s own parameters, so the engine itself is altered, not only surrounded.
+
+This site does not load that product’s weights. Closed chat models are described here and are not inspected. Only GPT-2 small is opened.
+
+## Later open models change specific pieces
+
+An open model is one whose weights are published. Many later open models keep GPT-2’s overall stack:
+
+1. Text becomes tokens.
+2. Each token becomes a row of numbers.
+3. The rows pass through a pile of repeated blocks, each with attention and a feed-forward step.
+4. The last rows become scores for the next token.
+
+What changes is a short list of named pieces inside that stack. Each one has its own page.
+
+- <Term id="rope">Rotary position</Term>. GPT-2 adds a row from a position table to each token. Rotary position instead turns the numbers that attention compares, by an amount set by each token’s place.
+- <Term id="rmsnorm">RMSNorm</Term>. A simpler version of the layer-norm step, which keeps each row in a steady range.
+- A <Term id="swiglu">gated feed-forward</Term>, also called a gated MLP. The feed-forward step gets an extra path that acts like a gate, deciding how much of each number passes through.
+- <Term id="grouped-query-attention">Grouped-query attention</Term>. Attention is split into heads. Here several heads share one set of the rows that attention looks up, so fewer of those rows are made and kept.
+
+These are changes to parts, not a new kind of system. The model still reads tokens and scores the next one.
+
+<Figure caption="Later models change named pieces of the same stack.">
+  <svg viewBox="0 0 400 390" width="100%" role="img" aria-label="Two stacks side by side. The GPT-2 stack has token table, position, layer norm, attention, feed-forward, and next-token scores. The later stack keeps token table and next-token scores, and has thick boxes for rotary position, RMSNorm, grouped query, and gated MLP.">
+    <text x="102" y="24" fontSize="16" fontWeight="600" textAnchor="middle" fill="currentColor">GPT-2</text>
+    <text x="298" y="24" fontSize="16" fontWeight="600" textAnchor="middle" fill="currentColor">Later open model</text>
+    <g stroke="currentColor" fill="none" strokeWidth="1.5">
+      <rect x="15" y="40" width="175" height="40" rx="4" />
+      <rect x="15" y="90" width="175" height="40" rx="4" />
+      <rect x="15" y="140" width="175" height="40" rx="4" />
+      <rect x="15" y="190" width="175" height="40" rx="4" />
+      <rect x="15" y="240" width="175" height="40" rx="4" />
+      <rect x="15" y="290" width="175" height="40" rx="4" />
+      <rect x="210" y="40" width="175" height="40" rx="4" />
+      <rect x="210" y="290" width="175" height="40" rx="4" />
+    </g>
+    <g stroke="currentColor" fill="currentColor" fillOpacity="0.08" strokeWidth="3.5">
+      <rect x="210" y="90" width="175" height="40" rx="4" />
+      <rect x="210" y="140" width="175" height="40" rx="4" />
+      <rect x="210" y="190" width="175" height="40" rx="4" />
+      <rect x="210" y="240" width="175" height="40" rx="4" />
+    </g>
+    <g fontSize="15" textAnchor="middle" fill="currentColor">
+      <text x="102" y="65">Token table</text>
+      <text x="102" y="115">Position</text>
+      <text x="102" y="165">Layer norm</text>
+      <text x="102" y="215">Attention</text>
+      <text x="102" y="265">Feed-forward</text>
+      <text x="102" y="315">Next-token scores</text>
+      <text x="298" y="65">Token table</text>
+      <text x="298" y="115" fontWeight="600">Rotary position</text>
+      <text x="298" y="165" fontWeight="600">RMSNorm</text>
+      <text x="298" y="215" fontWeight="600">Grouped query</text>
+      <text x="298" y="265" fontWeight="600">Gated MLP</text>
+      <text x="298" y="315">Next-token scores</text>
+    </g>
+    <text x="200" y="368" fontSize="14" textAnchor="middle" fill="currentColor">Thick boxes are the changed pieces</text>
+  </svg>
+</Figure>
+
+## The technical section continues from here
+
+The beginner pages end here. The <Term id="technical-index">technical section</Term> explains the same system one calculation at a time. Its order starts at vectors and reaches these later pieces at the end.
+
+The <Term id="map">map</Term> lists every page in that order, including pages that are not written yet.

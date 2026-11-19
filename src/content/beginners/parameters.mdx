@@ -1,0 +1,97 @@
+---
+title: Parameters
+description: A parameter is a number stored in the model. The forward pass reads the set, and training writes it.
+updated: 2026-11-19
+---
+
+A **parameter** is a number stored in the model. The forward pass reads the set, and training writes it.
+
+The forward pass is the one calculation that turns your tokens into scores for the next token. Every step of that calculation multiplies or adds stored numbers. Those stored numbers are the parameters. GPT-2 small keeps more than a hundred million of them in one file.
+
+You can think of parameters as the settings saved in a file. The comparison stops there: a person picks a setting, but no person picks these numbers. <Term id="training-and-inference">Training</Term> sets them, and a single parameter on its own rarely means anything you could name.
+
+## Name the main stores
+
+The parameters are kept in a few kinds of store. Each store is a grid of numbers, or a single list of numbers.
+
+1. **Token table.** One row of numbers for every token in the vocabulary. The vocabulary is the fixed list of tokens the model knows.
+2. **Position table.** One row of numbers for every position in the input: first token, second token, and so on.
+3. **Attention projections, in each block.** Grids that turn a token’s row into the pieces attention compares and mixes.
+4. **Feed-forward projections, in each block.** Two grids that widen each token’s row, then narrow it back.
+5. **Layer-norm scales and shifts, in each block.** Short lists that rescale a row and nudge it up or down. A layer norm is a step that keeps the numbers in a steady range.
+
+Here is how the first two stores are used when you type text.
+
+1. The text is split into tokens.
+2. For each token, the model looks up its row in the token table.
+3. For each position, the model looks up a row in the position table.
+4. The two rows are added together, number by number.
+5. The result goes into the first block, which uses that block’s attention, feed-forward, and layer-norm parameters.
+6. The same happens in each block after it, each with its own parameters.
+
+The exact name and shape of every stored grid is listed on the <Term id="weight-names">weight names</Term> page. This page only needs the main kinds.
+
+<Figure caption="Parameters are the stored tables and the block weights.">
+  <svg viewBox="0 0 400 400" width="100%" role="img" aria-label="Two tables, a token table with 50257 rows of 768 numbers and a position table with 1024 rows of 768 numbers, above one block holding attention weights, feed-forward weights, and layer-norm scales and shifts, marked times 12.">
+    <text x="105" y="24" fontSize="16" fontWeight="600" textAnchor="middle" fill="currentColor">Token table</text>
+    <text x="295" y="24" fontSize="16" fontWeight="600" textAnchor="middle" fill="currentColor">Position table</text>
+    <g stroke="currentColor" fill="none">
+      <rect x="20" y="36" width="170" height="110" strokeWidth="2" />
+      <rect x="210" y="36" width="170" height="110" strokeWidth="2" />
+      <g strokeWidth="1" strokeOpacity="0.5">
+        <path d="M20 54 H190 M20 72 H190 M20 90 H190 M20 108 H190 M20 126 H190" />
+        <path d="M62.5 36 V146 M105 36 V146 M147.5 36 V146" />
+        <path d="M210 54 H380 M210 72 H380 M210 90 H380 M210 108 H380 M210 126 H380" />
+        <path d="M252.5 36 V146 M295 36 V146 M337.5 36 V146" />
+      </g>
+    </g>
+    <text x="105" y="168" fontSize="14" textAnchor="middle" fill="currentColor">50257 rows × 768</text>
+    <text x="295" y="168" fontSize="14" textAnchor="middle" fill="currentColor">1024 rows × 768</text>
+    <g stroke="currentColor" fill="none">
+      <polyline points="40,212 40,202 380,202 380,372 370,372" strokeWidth="1.5" strokeOpacity="0.6" />
+      <polyline points="50,202 50,192 390,192 390,362 380,362" strokeWidth="1.5" strokeOpacity="0.35" />
+      <rect x="20" y="212" width="350" height="170" strokeWidth="2" />
+    </g>
+    <text x="38" y="240" fontSize="16" fontWeight="600" fill="currentColor">One block</text>
+    <text x="352" y="242" fontSize="20" fontWeight="600" textAnchor="end" fill="currentColor">× 12</text>
+    <g stroke="currentColor" strokeWidth="1.5" fill="currentColor" fillOpacity="0.06">
+      <rect x="38" y="256" width="314" height="32" rx="4" />
+      <rect x="38" y="296" width="314" height="32" rx="4" />
+      <rect x="38" y="336" width="314" height="32" rx="4" />
+    </g>
+    <text x="195" y="277" fontSize="15" textAnchor="middle" fill="currentColor">Attention weights</text>
+    <text x="195" y="317" fontSize="15" textAnchor="middle" fill="currentColor">Feed-forward weights</text>
+    <text x="195" y="357" fontSize="15" textAnchor="middle" fill="currentColor">Layer-norm scales and shifts</text>
+  </svg>
+</Figure>
+
+## The shape fixes the count
+
+The number of parameters is not a separate choice. It follows from a few size settings, called the model’s <Term id="config">config</Term>. GPT-2 small uses these:
+
+- **12 layers.** There are 12 blocks, stacked one after another.
+- **Hidden size 768.** Every token’s row holds 768 numbers.
+- **12 heads.** Attention in each block is split into 12 parallel parts, called heads.
+- **Context 1024.** The model reads at most 1024 tokens at once, so the position table has 1024 rows.
+- **Vocabulary 50257.** There are 50257 tokens, so the token table has 50257 rows.
+- **Feed-forward width 3072.** The feed-forward step widens each row to 3072 numbers, which is 4 × 768.
+
+Once the sizes are fixed, the size of each grid is fixed too. You can work out single stores with plain multiplication:
+
+- Token table: 50257 rows × 768 numbers = 38,597,376 numbers.
+- Position table: 1024 rows × 768 numbers = 786,432 numbers.
+- One feed-forward grid that widens a row: 768 × 3072 = 2,359,296 numbers.
+
+These are single stores, not the model’s total. Change one size setting, and the grids that use it grow or shrink with it.
+
+## Published totals differ by what they count
+
+The GPT-2 paper calls the small model 117M, meaning about 117 million parameters. Reports made from the released checkpoint are often near 124M instead. A checkpoint is the saved file of parameters.
+
+The gap comes from how embeddings are counted. An embedding is a row looked up from the token table or the position table. The token table is also reused at the output end of the model, to score every possible next token, and counts differ in how they treat these tables.
+
+Both labels name the same model. This page does not give a total of its own. The <Term id="config">config</Term> page computes a count from a loaded checkpoint and records what it included.
+
+## Inference reads them as constants
+
+Training changes the parameters, and inference, the use of a finished model, only reads them. When you send text to GPT-2 small, every parameter stays exactly as it was in the file. The same input with the same parameters gives the same next-token scores.

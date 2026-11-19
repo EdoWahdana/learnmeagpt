@@ -1,0 +1,78 @@
+---
+title: "What a chat request contains"
+description: "A chat request contains the text the product packs for the model, and a hosted product processes that text on the operator’s computers."
+updated: 2026-11-19
+---
+
+A **chat request** is the package of text a chat product sends to the model each time you press send. In a hosted product, that package travels over the internet and is processed on computers run by the operator: the company or group that runs the service.
+
+## The request holds the packed prompt
+
+The model does not keep earlier turns between requests. Each time you press send, the product builds the full text again and sends all of it. That full text is the <Term id="prompts">prompt</Term>. It is "packed" because the product assembles it from several pieces.
+
+Take a short chat as an example:
+
+1. You type: "Suggest a name for a grey cat."
+2. The reply says: "Smokey."
+3. You type: "Something shorter."
+
+When you send the third message, the request usually holds three pieces, in this order:
+
+1. **Instructions from the operator.** This text is often called a system prompt. It tells the model how to behave in this product. You usually cannot see its exact words, and this page does not guess them.
+2. **The earlier turns.** Here that is your first message and the reply "Smokey." Together, the earlier turns are the <Term id="using-a-chatbot">transcript</Term>.
+3. **Your new message.** Here that is "Something shorter."
+
+Without the earlier turns, "Something shorter" would have nothing to refer to. The model can only answer it because the product sent the cat question and "Smokey" again.
+
+The product decides how much of the transcript to send. A very long chat may be cut down so it fits the <Term id="context-window">context window</Term>, the limit on how much text the model can take in at once. If you upload a file or the product adds search results, that text is packed into the request too. Whatever is in the prompt is in the request.
+
+## A hosted chat leaves the reader’s machine
+
+A hosted chat is one where the model runs on someone else's computers, not on yours. Your laptop or phone shows the conversation. The calculation happens elsewhere.
+
+Here is what happens when you press send:
+
+1. Your message leaves your device over the internet.
+2. The product packs the prompt: the operator's instructions, the earlier turns, and your new message.
+3. The operator's computers run the model on that packed prompt and produce a reply.
+4. The reply travels back, and your screen shows it.
+
+So the operator receives the whole packed prompt. That includes the earlier turns and anything you pasted or uploaded, not only the last line you typed.
+
+Sending a chat message is a little like posting a letter: the words leave your desk and are read somewhere else. The comparison stops at one point. A letter carries one message, while each chat request carries the earlier conversation again.
+
+The tools on this site work differently. They run in your browser, the program you are using to read this page. The text you type into a tool's field is processed on your own device. The tool does not send it to a server.
+
+<Figure caption="A hosted chat sends the prompt. A tool on this site does not.">
+  <svg viewBox="0 0 600 290" width="100%" role="img" aria-label="A laptop sends an arrow labeled prompt to a box labeled operator. Below, a box labeled browser tool has no arrow leaving it.">
+    <defs>
+      <marker id="chat-request-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="currentColor" />
+      </marker>
+    </defs>
+    <rect x="40" y="30" width="120" height="80" rx="6" fill="none" stroke="currentColor" strokeWidth="2" />
+    <path d="M20 118 L180 118 L170 132 L30 132 Z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+    <text x="100" y="160" textAnchor="middle" fontSize="16" fill="currentColor">your device</text>
+    <line x1="192" y1="75" x2="392" y2="75" stroke="currentColor" strokeWidth="2" markerEnd="url(#chat-request-arrow)" />
+    <text x="292" y="62" textAnchor="middle" fontSize="16" fill="currentColor">prompt</text>
+    <rect x="400" y="30" width="180" height="90" rx="8" fill="none" stroke="currentColor" strokeWidth="2" />
+    <text x="490" y="72" textAnchor="middle" fontSize="16" fill="currentColor">operator</text>
+    <text x="490" y="96" textAnchor="middle" fontSize="14" fill="currentColor">runs the model</text>
+    <line x1="20" y1="190" x2="580" y2="190" stroke="currentColor" strokeWidth="1" strokeDasharray="4 6" />
+    <rect x="20" y="210" width="160" height="60" rx="8" fill="none" stroke="currentColor" strokeWidth="2" />
+    <text x="100" y="245" textAnchor="middle" fontSize="16" fill="currentColor">browser tool</text>
+    <text x="210" y="245" fontSize="16" fill="currentColor">nothing is sent</text>
+  </svg>
+</Figure>
+
+## Storage is defined by the operator
+
+Sending and storing are two separate questions. A hosted chat has to send the request, or there would be no reply. What happens to the request after it arrives is a different matter.
+
+<Note type="warning" title="Storage depends on the operator">
+
+Whether the operator keeps a request, for how long, and who can see it is set by that operator's policy. Policies differ between products and can change over time. This page does not restate any of them.
+
+To learn what happens to your requests in a product you use, read the policy that the product's operator publishes for it.
+
+</Note>

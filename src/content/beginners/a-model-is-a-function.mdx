@@ -1,0 +1,98 @@
+---
+title: "A model is a function"
+description: "During a reply, the model is a fixed function from the current token ids to a distribution over the next id."
+updated: 2026-11-19
+---
+
+A **function** is a fixed rule that turns an input into an output, and gives the same output every time it gets the same input. During a reply, a language model is a function of this kind: it takes the current token ids and returns a distribution over the next id, a list of how likely each possible next token is.
+
+A calculator's square-root key is a simple function. Press it on 9 and you get 3, every time. The comparison stops at the size of the output: the model returns one probability for every token it knows, not a single number.
+
+Here is one call, step by step, using the GPT-2 tokenizer:
+
+1. The text "The cat sat on the" is split into five tokens: "The", " cat", " sat", " on", " the".
+2. Each token is replaced by its id: 464, 3797, 3332, 319, 262.
+3. Those five ids go into the function.
+4. The function returns a probability for each of the 50,257 ids GPT-2 knows.
+5. One id is then picked, for example 2603, which is " mat". It is added to the end, and the function is called again with six ids.
+
+One run of the function, from ids in to distribution out, is called a forward pass. The rest of this page looks at each part of that call.
+
+<Figure caption="One forward pass is a function call.">
+  <svg viewBox="0 0 600 250" width="100%" role="img" aria-label="Two inputs, token ids and parameters, point into a box labeled function. One arrow leaves the function box and points to a box labeled distribution.">
+    <defs>
+      <marker id="model-function-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="currentColor" />
+      </marker>
+    </defs>
+    <rect x="10" y="30" width="150" height="56" rx="8" fill="none" stroke="currentColor" strokeWidth="2" />
+    <text x="85" y="63" textAnchor="middle" fontSize="16" fill="currentColor">token ids</text>
+    <rect x="10" y="154" width="150" height="56" rx="8" fill="none" stroke="currentColor" strokeWidth="2" />
+    <text x="85" y="187" textAnchor="middle" fontSize="16" fill="currentColor">parameters</text>
+    <text x="85" y="236" textAnchor="middle" fontSize="14" fill="currentColor">fixed</text>
+    <line x1="162" y1="62" x2="228" y2="104" stroke="currentColor" strokeWidth="2" markerEnd="url(#model-function-arrow)" />
+    <line x1="162" y1="178" x2="228" y2="136" stroke="currentColor" strokeWidth="2" markerEnd="url(#model-function-arrow)" />
+    <rect x="232" y="82" width="140" height="76" rx="8" fill="none" stroke="currentColor" strokeWidth="2" />
+    <text x="302" y="125" textAnchor="middle" fontSize="16" fill="currentColor">function</text>
+    <line x1="374" y1="120" x2="434" y2="120" stroke="currentColor" strokeWidth="2" markerEnd="url(#model-function-arrow)" />
+    <rect x="440" y="92" width="150" height="56" rx="8" fill="none" stroke="currentColor" strokeWidth="2" />
+    <text x="515" y="125" textAnchor="middle" fontSize="16" fill="currentColor">distribution</text>
+  </svg>
+</Figure>
+
+## The inputs are token ids
+
+A token is a piece of text, often a word or part of a word. Each token has a number, its id. The model never sees letters. It sees a list of whole numbers: the <Term id="tokens">token ids</Term>.
+
+The list has a length limit, called the <Term id="context-window">context window</Term>. For GPT-2 the limit is 1,024 ids. A longer text must be shortened before the call. Within that limit, the list can be any length, from one id upward.
+
+## The parameters are part of the function
+
+A model also holds a very large set of stored numbers, called <Term id="parameters">parameters</Term>. They were set during training. They decide what the function computes.
+
+For one reply, the parameters do not change. They are constants, like the fixed amounts printed in a recipe. Only the token ids change from one call to the next.
+
+In words, the relationship is:
+
+> The next-token distribution is a function of the token ids and the parameters.
+
+That sentence has three consequences:
+
+1. Change the token ids, and the distribution changes.
+2. Change the parameters, and you have a different model, which gives a different distribution.
+3. Keep both the same, and the distribution is the same. Hardware can add tiny rounding differences, but the rule itself is fixed.
+
+So one forward pass maps token ids and fixed parameters to a distribution over the vocabulary. The vocabulary is the full list of tokens the model knows.
+
+## The output is one distribution
+
+For every id in the vocabulary, the function computes a score. The scores are then turned into probabilities. That list of probabilities is the <Term id="the-next-token">distribution</Term>.
+
+The probabilities follow two rules:
+
+1. Each one is zero or more. None is negative.
+2. All of them together add up to 1.
+
+Here is a made-up example for "The cat sat on the". The numbers are for illustration, not real GPT-2 output:
+
+| Next token | Probability |
+|---|---|
+| " mat" | 0.20 |
+| " floor" | 0.10 |
+| " bed" | 0.05 |
+| All other 50,254 ids together | 0.65 |
+
+Check the sum: 0.20 + 0.10 + 0.05 + 0.65 = 1.00. Every id in the vocabulary gets a probability, even if it is tiny.
+
+One call gives one distribution, for the next position only. It does not produce a whole sentence. The <Term id="softmax">softmax</Term> page shows the formula that turns scores into probabilities.
+
+## Sampling reads that distribution
+
+The function stops at the distribution. Choosing one id is a separate step that happens afterward, called <Term id="sampling">sampling</Term>.
+
+Using the made-up numbers above, the product can:
+
+1. Pick the most likely id, " mat", every time.
+2. Or pick at random, in proportion to the probabilities. Then " mat" is chosen about 20 times in 100, " floor" about 10 times in 100, and so on.
+
+A reply is many of these rounds in a row: call the function, pick an id, add it to the list, call again. Any randomness lives in the picking step, not in the function. That is why the same message can get different replies while the function stays the same. <Term id="temperature">Temperature</Term>, a later page, changes how the pick is made.

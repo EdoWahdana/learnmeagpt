@@ -1,0 +1,33 @@
+---
+title: Temperature
+description: "The tool divides logits by a temperature and shows the softmax."
+updated: 2026-11-19
+---
+
+import { TemperatureSampler } from "@/components/tools/TemperatureSampler"
+
+This tool divides three scores, called logits, by a <Term id="temperature">temperature</Term> T and turns them into probabilities with softmax.
+
+The calculation runs in your browser, and the numbers are not sent anywhere.
+
+<TemperatureSampler />
+
+The Python below divides the scores 1, 2, 3 by T and applies softmax, for T = 1 and T = 2.
+
+```python
+import math
+
+def softmax(scores):
+    biggest = max(scores)
+    exps = [math.exp(s - biggest) for s in scores]
+    total = sum(exps)
+    return [e / total for e in exps]
+
+logits = [1, 2, 3]
+for T in (1, 2):
+    probs = softmax([x / T for x in logits])
+    print(f"T = {T}:", [f"{p:.4f}" for p in probs])
+
+# T = 1: ['0.0900', '0.2447', '0.6652']
+# T = 2: ['0.1863', '0.3072', '0.5065']
+```

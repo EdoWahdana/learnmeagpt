@@ -1,0 +1,86 @@
+---
+title: The transformer
+description: A GPT-2 transformer is a stack of blocks. Each block mixes tokens with attention and then passes each position through the same feed-forward network.
+updated: 2026-11-19
+---
+
+The **transformer** is the main body of a GPT: a pile of layers that the token vectors pass through, one layer after another. A GPT-2 transformer is a stack of blocks. Each block mixes tokens with attention and then passes each position through the same feed-forward network.
+
+Follow the prompt "The cat sat" through it. The prompt is three tokens, and each token has already become a vector of 768 numbers. So the transformer starts with three rows of numbers, one row per token, each row 768 numbers long.
+
+## One block does two jobs
+
+A <Term id="transformer-block">block</Term> is one layer of the stack. It takes rows of numbers in and gives the same number of rows out, each still 768 numbers long. Inside, it does two jobs in order:
+
+1. **Attention mixes across positions.** The row for "sat" takes in shares of the rows for "The" and "cat", as described on the <Term id="attention">attention</Term> page. This is the only step where rows exchange information.
+2. **The feed-forward network transforms each position on its own.** A feed-forward network is a fixed calculation with learned numbers. It stretches one row from 768 numbers to 3072, applies a fixed curve to each number, and shrinks the result back to 768.
+
+The feed-forward step uses the same learned numbers at every position. The row for "The" and the row for "sat" go through exactly the same calculation. No row looks at another row during this step.
+
+A meeting followed by desk work is a useful comparison. In the meeting, each person hears from the people who spoke before them. Then everyone goes back to a desk and works alone, following the same instructions. The comparison stops at the people: a block reads no meaning, it only does arithmetic on rows of numbers.
+
+<Note type="note" title="Two helper steps">
+
+A block also contains two small helper steps. One keeps the numbers in a steady range, and one adds each job's result onto its input instead of replacing it. Later pages cover both.
+
+</Note>
+
+## GPT-2 small stacks 12 blocks
+
+GPT-2 small has 12 blocks. The output of one block is the input of the next. For "The cat sat":
+
+1. The three tokens become three rows of 768 numbers.
+2. Block 1 turns them into three new rows of 768 numbers.
+3. Block 2 takes those rows and produces three more rows of 768 numbers.
+4. The same happens in blocks 3 to 11.
+5. Block 12 produces the final three rows of 768 numbers.
+
+The length of each row is called the hidden size. In GPT-2 small it is 768 at the start of the stack, between every pair of blocks, and at the end. Only the numbers inside the rows change.
+
+All 12 blocks have the same shape, but each block has its own learned numbers. Block 5 does not reuse the numbers of block 4. Because each block works on rows that earlier blocks have already mixed, information can travel further with every block.
+
+<Figure caption="GPT-2 small stacks 12 blocks.">
+  <svg viewBox="0 0 600 390" width="100%" role="img" aria-label="A box labeled The cat sat, 3 rows of 768, feeds into Block 1, then Block 2, then Block 3, then a gap for blocks 4 to 11, then Block 12, then a box labeled logits, 50257 scores. A note says each block does attention, then feed-forward, and each row stays 768 numbers.">
+    <defs>
+      <marker id="tf-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+      </marker>
+    </defs>
+    <rect x="150" y="10" width="300" height="40" rx="6" fill="none" stroke="currentColor" strokeWidth="1.5" />
+    <text x="300" y="36" fontSize="16" textAnchor="middle" fill="currentColor">The cat sat: 3 rows of 768</text>
+    <line x1="300" y1="50" x2="300" y2="69" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#tf-arrow)" />
+    <rect x="200" y="70" width="200" height="40" rx="6" fill="currentColor" fillOpacity="0.12" stroke="currentColor" strokeWidth="1.5" />
+    <text x="300" y="96" fontSize="16" textAnchor="middle" fill="currentColor">Block 1</text>
+    <line x1="300" y1="110" x2="300" y2="129" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#tf-arrow)" />
+    <rect x="200" y="130" width="200" height="40" rx="6" fill="currentColor" fillOpacity="0.12" stroke="currentColor" strokeWidth="1.5" />
+    <text x="300" y="156" fontSize="16" textAnchor="middle" fill="currentColor">Block 2</text>
+    <line x1="300" y1="170" x2="300" y2="189" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#tf-arrow)" />
+    <rect x="200" y="190" width="200" height="40" rx="6" fill="currentColor" fillOpacity="0.12" stroke="currentColor" strokeWidth="1.5" />
+    <text x="300" y="216" fontSize="16" textAnchor="middle" fill="currentColor">Block 3</text>
+    <line x1="300" y1="232" x2="300" y2="279" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 5" markerEnd="url(#tf-arrow)" />
+    <text x="315" y="260" fontSize="14" textAnchor="start" fill="currentColor">blocks 4 to 11</text>
+    <rect x="200" y="280" width="200" height="40" rx="6" fill="currentColor" fillOpacity="0.12" stroke="currentColor" strokeWidth="1.5" />
+    <text x="300" y="306" fontSize="16" textAnchor="middle" fill="currentColor">Block 12</text>
+    <line x1="300" y1="320" x2="300" y2="339" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#tf-arrow)" />
+    <rect x="150" y="340" width="300" height="40" rx="6" fill="none" stroke="currentColor" strokeWidth="1.5" />
+    <text x="300" y="366" fontSize="16" textAnchor="middle" fill="currentColor">Logits: 50257 scores</text>
+    <text x="420" y="130" fontSize="15" textAnchor="start" fill="currentColor">each block:</text>
+    <text x="420" y="152" fontSize="15" textAnchor="start" fill="currentColor">attention,</text>
+    <text x="420" y="174" fontSize="15" textAnchor="start" fill="currentColor">then</text>
+    <text x="420" y="196" fontSize="15" textAnchor="start" fill="currentColor">feed-forward</text>
+    <text x="185" y="146" fontSize="15" textAnchor="end" fill="currentColor">each row</text>
+    <text x="185" y="168" fontSize="15" textAnchor="end" fill="currentColor">stays 768</text>
+  </svg>
+</Figure>
+
+## A final step produces logits
+
+After block 12, one more steadying step runs, and then a final calculation turns a row of 768 numbers into 50257 numbers. GPT-2 has a vocabulary of 50257 token ids, so there is one number for each id. These numbers are the <Term id="logits">logits</Term>: scores that softmax turns into probabilities for the next token.
+
+The final calculation is a linear map. Each logit is made by multiplying the row's 768 numbers by 768 learned numbers, one pair at a time, and adding the products. The row at the last position, "sat", gives the scores for the token that comes after "sat".
+
+GPT-2 does not store a separate table of learned numbers for this step. It reuses the token embedding: the table that turned each token id into its starting vector of 768 numbers. That one table is used twice, once at the start to look up each token's vector and once at the end to score every possible next token. The stored names of these tables are listed on a later page.
+
+## The same stack runs at every generation step
+
+<Term id="how-a-gpt-works">How a GPT works</Term> describes generation as a loop: tokens go in, a distribution over the next token comes out, and one token is appended. Every turn of that loop runs the whole stack again, all 12 blocks and the final step, with the same stored numbers, on the prompt plus every token added so far.

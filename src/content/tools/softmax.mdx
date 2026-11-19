@@ -1,0 +1,32 @@
+---
+title: Softmax
+description: "The tool turns a list of scores into probabilities that sum to 1."
+updated: 2026-11-19
+---
+
+import { Softmax } from "@/components/tools/Softmax";
+
+This tool turns a list of scores into probabilities that add up to 1, using <Term id="softmax">softmax</Term>, the same step a model uses to choose <Term id="the-next-token">the next token</Term>.
+
+The calculation runs in your browser, and the numbers you type are not sent anywhere.
+
+<Softmax />
+
+This Python function does the same calculation and prints the probabilities and their total for the starting scores.
+
+```python
+import math
+
+def softmax(scores):
+    largest = max(scores)
+    exps = [math.exp(s - largest) for s in scores]
+    total = sum(exps)
+    return [e / total for e in exps]
+
+probabilities = softmax([1, 2, 3])
+print(", ".join(f"{p:.4f}" for p in probabilities))
+print(f"{sum(probabilities):.4f}")
+
+# 0.0900, 0.2447, 0.6652
+# 1.0000
+```

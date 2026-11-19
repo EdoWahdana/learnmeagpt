@@ -1,0 +1,119 @@
+---
+title: Tokens
+description: "A token is an item in a fixed vocabulary, and a piece of text is a sequence of those items’ ids."
+updated: 2026-11-19
+---
+
+import { Tokenizer } from "@/components/tools/Tokenizer";
+
+A **token** is one piece of text from a fixed list of pieces the model knows. That list is called the <Term id="vocabulary">vocabulary</Term>, and every entry in it has a number, its id. To a GPT, your message is not letters. It is a sequence of those ids.
+
+## Text is split before any layer runs
+
+A GPT only computes with numbers. Its layers, the stages of calculation inside the model, never see a letter. So before any layer runs, a separate program called a tokenizer turns your text into a list of integers (whole numbers).
+
+Here is what GPT-2’s tokenizer does with the sentence “The cat sat on the mat.”
+
+1. It takes the text as one string. A string is a programmer’s word for a piece of text.
+2. It cuts the string into pieces found in the vocabulary: `The`, ` cat`, ` sat`, ` on`, ` the`, ` mat`, and `.`. The space in front of a word belongs to that word’s piece.
+3. It replaces each piece with its id. The result is a list of seven integers: 464, 3797, 3332, 319, 262, 2603, 13.
+
+That list of seven numbers is everything the model receives. The sentence itself stays outside.
+
+A vocabulary works a little like a numbered dictionary: look up an entry, get its line number. The comparison stops at the entries. A dictionary lists whole words, and a vocabulary also lists word pieces, single characters, and punctuation.
+
+## GPT-2 uses a byte-level vocabulary of 50257
+
+GPT-2’s vocabulary has exactly 50257 entries. Their ids run from 0 to 50256. The list was fixed before the model was trained, and it never changes while you use the model.
+
+The vocabulary is byte-level. Computers store every character as one or more bytes, and a byte is a small number from 0 to 255. Every possible byte has its own entry in the vocabulary. Most of the remaining entries are common chunks of text, such as a whole word or a space followed by a word.
+
+Because single bytes are always available, any text can be encoded. That includes any language, any symbol, and any emoji that Unicode (the standard numbering for the world’s characters) describes. When a chunk is not in the list as a whole, the tokenizer uses smaller pieces, down to single bytes if needed. Nothing is ever “unknown.”
+
+<Note type="warning" title="Ids cannot be guessed">
+
+The id for a particular word is whatever the GPT-2 tokenizer returns for it. It cannot be guessed from the spelling.
+
+</Note>
+
+## A word is not always one token
+
+Common words are usually one token. Rarer words, names, and long words are often split into several. These splits were computed with GPT-2’s tokenizer:
+
+- ` cat` is one token.
+- `tokenization` is two tokens: `token` and `ization`.
+- ` ChatGPT` is three tokens: ` Chat`, `G`, and `PT`.
+- ` antidisestablishmentarianism` is five tokens: ` ant`, `idis`, `establishment`, `arian`, and `ism`.
+
+The pieces do not have to match meaningful parts of a word. In the last example, `ant` and `idis` are not the word parts a dictionary would list. Tokens do not match English words, and they were never meant to.
+
+Small details change the split too. `Hello` at the start of a text and ` hello` after a space are two different tokens, with two different ids. Capital letters, spaces, and punctuation all count.
+
+<Note type="tip" title="Try it below">
+
+The GPT-2 tokenizer on this site runs in your browser. The text you type into it is not sent anywhere.
+
+</Note>
+
+<Figure caption="Text becomes a sequence of vocabulary ids">
+  <svg viewBox="0 0 600 290" width="100%" role="img" aria-label="The text I love tokenization! is split into five boxes: I, love, token, ization, and an exclamation mark. An arrow from each box points to a cell marked id.">
+    <defs>
+      <marker id="tokens-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0,0 L10,5 L0,10 z" fill="currentColor" />
+      </marker>
+    </defs>
+    <text x="36" y="18" fontSize="14" fill="currentColor">text</text>
+    <rect x="36" y="28" width="528" height="44" rx="6" fill="none" stroke="currentColor" strokeWidth="1.5" />
+    <text x="300" y="56" fontSize="16" textAnchor="middle" fill="currentColor">I love tokenization!</text>
+    <line x1="300" y1="76" x2="300" y2="106" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#tokens-arrow)" />
+    <text x="36" y="124" fontSize="14" fill="currentColor">tokens</text>
+    <g fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="36" y="134" width="96" height="44" rx="6" />
+      <rect x="144" y="134" width="96" height="44" rx="6" />
+      <rect x="252" y="134" width="96" height="44" rx="6" />
+      <rect x="360" y="134" width="96" height="44" rx="6" />
+      <rect x="468" y="134" width="96" height="44" rx="6" />
+    </g>
+    <g fontSize="16" textAnchor="middle" fill="currentColor">
+      <text x="84" y="162">I</text>
+      <text x="192" y="162">love</text>
+      <text x="300" y="162">token</text>
+      <text x="408" y="162">ization</text>
+      <text x="516" y="162">!</text>
+    </g>
+    <g stroke="currentColor" strokeWidth="1.5">
+      <line x1="84" y1="182" x2="84" y2="210" markerEnd="url(#tokens-arrow)" />
+      <line x1="192" y1="182" x2="192" y2="210" markerEnd="url(#tokens-arrow)" />
+      <line x1="300" y1="182" x2="300" y2="210" markerEnd="url(#tokens-arrow)" />
+      <line x1="408" y1="182" x2="408" y2="210" markerEnd="url(#tokens-arrow)" />
+      <line x1="516" y1="182" x2="516" y2="210" markerEnd="url(#tokens-arrow)" />
+    </g>
+    <text x="36" y="226" fontSize="14" fill="currentColor">ids</text>
+    <g fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="36" y="236" width="96" height="44" />
+      <rect x="144" y="236" width="96" height="44" />
+      <rect x="252" y="236" width="96" height="44" />
+      <rect x="360" y="236" width="96" height="44" />
+      <rect x="468" y="236" width="96" height="44" />
+    </g>
+    <g fontSize="16" textAnchor="middle" fill="currentColor">
+      <text x="84" y="264">id</text>
+      <text x="192" y="264">id</text>
+      <text x="300" y="264">id</text>
+      <text x="408" y="264">id</text>
+      <text x="516" y="264">id</text>
+    </g>
+  </svg>
+</Figure>
+
+<Tokenizer initialText="I love tokenization!" />
+
+## The ids are indexes
+
+An index is a position in a list. Id 3797 means “entry number 3797,” and nothing more. It is an address, not an amount.
+
+So the size of an id says nothing about the token. Id 17 is not more, bigger, or more important than id 16. Two ids that are close together do not have to mean similar things. The number 17 is not the meaning of a token.
+
+What the id does is pick a row. Inside the model is a table with one row for each of the 50257 tokens. Each row is a list of numbers that the model learned during training; in GPT-2 small, each row holds 768 numbers. This row is called the token’s <Term id="text-becomes-numbers">embedding</Term>, and it is what the layers compute with.
+
+Think of locker numbers. Locker 17 is not worth more than locker 16; the number only says which door to open. The comparison stops at neighbours. Lockers 16 and 17 sit side by side, and tokens 16 and 17 have no such connection.

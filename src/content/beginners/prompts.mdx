@@ -1,0 +1,74 @@
+---
+title: Prompts
+description: A prompt is the token sequence already present when generation starts.
+updated: 2026-11-19
+---
+
+A **prompt** is the token sequence already present when generation starts. Put simply, it is all the text the model has been given before it produces its first new token.
+
+## The prompt is the starting sequence
+
+The model works out the chances for the next token from the tokens it already has. Those starting tokens are the prompt. The model **conditions on** the prompt, which means every chance it computes depends on those tokens.
+
+A small example shows the effect. Given "Once upon a", the token "time" gets a high chance. Given "The capital of France is", the token "Paris" does. Change the prompt and the chances change with it.
+
+The prompt is input. It is already split into <Term id="tokens">tokens</Term> before any new token is produced.
+
+In a chat product, the prompt is not only your last message. The product packs the whole <Term id="using-a-chatbot">transcript</Term> into one sequence: the system instructions, every earlier message, and your newest one. That packed transcript is the prompt.
+
+<Figure caption="The prompt is the sequence already filled in">
+<svg viewBox="0 0 600 180" width="100%" role="img" aria-label="A row of six cells. The first five hold The, capital, of, France, is. A bracket over them is labeled prompt. The sixth cell is dotted and holds a question mark, labeled next token, not chosen yet.">
+  <text x="252" y="28" textAnchor="middle" fontSize="16" fill="currentColor">prompt</text>
+  <path d="M 15 52 V 40 H 489 V 52" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  <rect x="15" y="62" width="90" height="50" rx="4" fill="none" stroke="currentColor" strokeWidth="2" />
+  <text x="60" y="93" textAnchor="middle" fontSize="16" fill="currentColor">The</text>
+  <rect x="111" y="62" width="90" height="50" rx="4" fill="none" stroke="currentColor" strokeWidth="2" />
+  <text x="156" y="93" textAnchor="middle" fontSize="16" fill="currentColor">capital</text>
+  <rect x="207" y="62" width="90" height="50" rx="4" fill="none" stroke="currentColor" strokeWidth="2" />
+  <text x="252" y="93" textAnchor="middle" fontSize="16" fill="currentColor">of</text>
+  <rect x="303" y="62" width="90" height="50" rx="4" fill="none" stroke="currentColor" strokeWidth="2" />
+  <text x="348" y="93" textAnchor="middle" fontSize="16" fill="currentColor">France</text>
+  <rect x="399" y="62" width="90" height="50" rx="4" fill="none" stroke="currentColor" strokeWidth="2" />
+  <text x="444" y="93" textAnchor="middle" fontSize="16" fill="currentColor">is</text>
+  <rect x="495" y="62" width="90" height="50" rx="4" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="5 5" />
+  <text x="540" y="93" textAnchor="middle" fontSize="16" fill="currentColor">?</text>
+  <text x="540" y="140" textAnchor="middle" fontSize="15" fill="currentColor">next token,</text>
+  <text x="540" y="160" textAnchor="middle" fontSize="15" fill="currentColor">not chosen yet</text>
+</svg>
+</Figure>
+
+## A prompt can contain an instruction, source text, and a question
+
+A prompt is one input string, but it often has three parts in it:
+
+1. An **instruction**: a line saying what kind of text should follow.
+2. **Source text**: material the answer should draw on, such as a paragraph.
+3. A **question**: what is being asked about that material.
+
+Here is a short example with all three:
+
+```text
+Answer the question using only the paragraph below.
+
+The library opens at 9 a.m. on weekdays and at 10 a.m. on Saturdays. It is closed on Sundays.
+
+When is the library closed?
+```
+
+The instruction is not a separate command sent to the model. It is text inside the prompt, split into tokens like every other part. It has an effect because the model was trained on many texts where an instruction like this was followed by a matching answer.
+
+The three parts make some continuations more likely than others. They do not guarantee a correct or complete answer.
+
+## The model continues that sequence
+
+The output is the **continuation**: new tokens added after the last token of the prompt. In the library example, the continuation might be "The library is closed on Sundays."
+
+The output is not a separate lookup in a database. There is no table of stored answers that the model searches. "Sundays" comes out because, given those exact prompt tokens, the calculation gives it a high chance. It happens to appear in the paragraph, and the question points at it.
+
+If the paragraph were left out, the model would still continue the text. It would produce a likely-sounding answer about some library, which may not match this one. The prompt is the only information about this library that the model has.
+
+## The same words can tokenize in more than one way
+
+Tokens are pieces of text, and they are not always whole words. The same word can be split into different tokens depending on what surrounds it. A word at the start of a line, the same word after a space, and the same word with a capital letter can each become different tokens.
+
+So two prompts that look almost the same to you can be different sequences to the model. The next page shows the split on real text.

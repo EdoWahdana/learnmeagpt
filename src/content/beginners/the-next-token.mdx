@@ -1,0 +1,133 @@
+---
+title: The next token
+description: The model produces one score per vocabulary id, and softmax turns those scores into probabilities that sum to 1.
+updated: 2026-11-19
+---
+
+import { Softmax } from "@/components/tools/Softmax";
+
+After reading the text so far, a GPT model produces one score for every token id in its vocabulary. A step called **softmax** turns those scores into probabilities that sum to 1, and one token is then chosen from them.
+
+The vocabulary is the full list of tokens the model knows. GPT-2 small's vocabulary has 50257 tokens, so it produces 50257 scores each time. A probability is a number from 0 to 1 that says how likely something is: 0.5 means half the time, 1 means always.
+
+This page uses a tiny example. The text so far is "The cat sat on the", and the vocabulary has only three tokens: "moon", "sofa", and "mat". A real model scores all 50257 tokens the same way.
+
+## Scores come first
+
+The model's raw scores are called <Term id="logits">logits</Term>. There is one logit for each vocabulary id, and each logit is a real number. A real number is any number on the number line, so a logit can be negative, zero, a whole number, or a decimal like 4.17.
+
+In the example, the logits are:
+
+| Token | Logit |
+|---|---|
+| moon | 1 |
+| sofa | 2 |
+| mat | 3 |
+
+A higher logit means the model rates that token as a more likely next token. Logits are not probabilities yet. These three add up to 1 + 2 + 3 = 6, not 1, and a negative logit cannot be a probability at all.
+
+## Softmax makes a distribution
+
+A distribution is a list of probabilities, one per token, that adds up to exactly 1. Softmax turns any list of logits into a distribution in four steps. Here it is for the logits (1, 2, 3):
+
+1. **Subtract the largest logit from every logit.** The largest is 3, so (1, 2, 3) becomes (1 − 3, 2 − 3, 3 − 3) = (−2, −1, 0). This keeps the numbers small for the computer. It does not change the final answer, because softmax only depends on how far apart the logits are.
+2. **Exponentiate each number.** Exponentiating x means computing e to the power x, where e is a fixed number, about 2.71828. This gives e to the −2 ≈ 0.1353, e to the −1 ≈ 0.3679, and e to the 0 = 1. Every result is positive, even when the starting number is negative.
+3. **Add the results.** 0.1353 + 0.3679 + 1 = 1.5032.
+4. **Divide each result by that sum.** 0.1353 ÷ 1.5032 ≈ 0.0900, 0.3679 ÷ 1.5032 ≈ 0.2447, and 1 ÷ 1.5032 ≈ 0.6652.
+
+<Note type="note" title="Rounding">
+
+So softmax of (1, 2, 3), rounded to 4 decimals, is 0.0900, 0.2447, and 0.6652. The rounded numbers add to 0.9999 only because of rounding. Before rounding, they add to 1.
+
+</Note>
+
+<Figure caption="Softmax turns scores into probabilities.">
+  <svg viewBox="0 0 600 300" width="100%" role="img" aria-label="Left: three bars for the scores 1, 2, and 3, labeled moon, sofa, and mat, adding up to 6. An arrow labeled softmax points right. Right: three bars for the probabilities 0.0900, 0.2447, and 0.6652, adding up to 1.">
+    <defs>
+      <marker id="next-token-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+      </marker>
+    </defs>
+    <g fill="currentColor" fontSize="16" textAnchor="middle">
+      <text x="140" y="36">Scores (logits)</text>
+      <text x="460" y="36">Probabilities</text>
+    </g>
+    <g fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="1.5">
+      <rect x="58" y="185" width="44" height="45" />
+      <rect x="118" y="140" width="44" height="90" />
+      <rect x="178" y="95" width="44" height="135" />
+      <rect x="378" y="212" width="44" height="18" />
+      <rect x="438" y="181" width="44" height="49" />
+      <rect x="498" y="97" width="44" height="133" />
+    </g>
+    <g stroke="currentColor" strokeWidth="1.5">
+      <line x1="40" y1="230" x2="240" y2="230" />
+      <line x1="360" y1="230" x2="560" y2="230" />
+      <line x1="245" y1="150" x2="352" y2="150" markerEnd="url(#next-token-arrow)" />
+    </g>
+    <g fill="currentColor" fontSize="15" textAnchor="middle">
+      <text x="80" y="177">1</text>
+      <text x="140" y="132">2</text>
+      <text x="200" y="87">3</text>
+      <text x="400" y="204">0.0900</text>
+      <text x="460" y="173">0.2447</text>
+      <text x="520" y="89">0.6652</text>
+      <text x="300" y="138">softmax</text>
+    </g>
+    <g fill="currentColor" fontSize="14" textAnchor="middle">
+      <text x="80" y="252">moon</text>
+      <text x="140" y="252">sofa</text>
+      <text x="200" y="252">mat</text>
+      <text x="400" y="252">moon</text>
+      <text x="460" y="252">sofa</text>
+      <text x="520" y="252">mat</text>
+      <text x="140" y="284">Sum: 6</text>
+      <text x="460" y="284">Sum: 1</text>
+    </g>
+  </svg>
+</Figure>
+
+<Softmax />
+
+The code below does the same four steps for any list of logits, then prints each probability to 4 decimals and the total to 4 decimals.
+
+```python
+import math
+
+def softmax(scores):
+    # 1. Subtract the largest score so no number gets too big.
+    biggest = max(scores)
+    shifted = [s - biggest for s in scores]
+    # 2. Raise e to the power of each number. Every result is positive.
+    exps = [math.exp(s) for s in shifted]
+    # 3. Add them up.
+    total = sum(exps)
+    # 4. Divide each by the total so the results sum to 1.
+    return [e / total for e in exps]
+
+probs = softmax([1, 2, 3])
+print(", ".join(f"{p:.4f}" for p in probs))
+print(f"{sum(probs):.4f}")
+
+# prints:
+# 0.0900, 0.2447, 0.6652
+# 1.0000
+```
+
+## A higher logit becomes a higher probability
+
+Softmax keeps the order of the logits. In the example, the logit 3 for "mat" becomes 0.6652, the logit 2 for "sofa" becomes 0.2447, and the logit 1 for "moon" becomes 0.0900. The highest score gets the highest probability.
+
+The gaps grow. Each logit here is 1 more than the one before, and each probability is about 2.718 times the one before: 0.2447 ÷ 0.0900 ≈ 2.72, and 0.6652 ÷ 0.2447 ≈ 2.72. That factor is e, because of the exponent in step 2.
+
+No probability is ever exactly 0. Exponentiating always gives a positive number, so even "moon" keeps 0.0900, about 9 in 100.
+
+## One id is then chosen
+
+The distribution says how likely each token is. The model still has to pick one.
+
+The simplest choice is the token with the largest probability. In the example, that is "mat", with 0.6652. Another way is to draw at random using the probabilities as odds, like a weighted lottery: "mat" would come up about 67 times in 100 draws, "sofa" about 24, and "moon" about 9.
+
+The chosen id is turned back into text and added to the end. The model then runs again on the longer text to produce the next set of logits.
+
+A setting called <Term id="temperature">temperature</Term> changes the distribution before the choice is made. How it does that is explained on its own page.

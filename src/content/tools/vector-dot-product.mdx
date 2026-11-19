@@ -1,0 +1,30 @@
+---
+title: Vector dot product
+description: "The tool multiplies two equal-length vectors position by position and adds the products."
+updated: 2026-11-19
+---
+
+import { VectorDotProduct } from "@/components/tools/VectorDotProduct";
+
+This tool multiplies two <Term id="vectors">vectors</Term> position by position and adds the products to give one number, the <Term id="dot-product">dot product</Term>.
+
+The calculation runs in your browser, and the numbers you type are not sent anywhere.
+
+<VectorDotProduct />
+
+This Python function does the same calculation and prints the products and the sum for the starting vectors.
+
+```python
+def dot(a, b):
+    if len(a) != len(b):
+        raise ValueError("the vectors must have the same length")
+    return sum(x * y for x, y in zip(a, b))
+
+a = [1, 2, 3]
+b = [4, 5, 6]
+print([x * y for x, y in zip(a, b)])
+print(dot(a, b))
+
+# [4, 10, 18]
+# 32
+```

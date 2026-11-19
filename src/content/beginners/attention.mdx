@@ -1,0 +1,110 @@
+---
+title: Attention
+description: Attention builds a new vector for each token as a weighted sum of value vectors from tokens it is allowed to read.
+updated: 2026-11-19
+---
+
+**Attention** is the step where each token collects information from the tokens before it. For every token, it builds a new <Term id="vectors">vector</Term> by blending the vectors of the tokens that token is allowed to read, using weights that say how much to take from each one.
+
+Take the three-word prompt "The cat sat". Each word is one token, and each token starts as its own vector: a list of numbers. Before attention, the vector for "sat" contains nothing about "cat". The rest of this page follows what attention does to that sentence.
+
+## Each token can read earlier tokens
+
+In a GPT, every position may read itself and the positions before it. It may not read positions after it.
+
+For "The cat sat":
+
+1. "The" reads only "The".
+2. "cat" reads "The" and "cat".
+3. "sat" reads "The", "cat", and "sat".
+
+The rule matches how a GPT is used. It writes text one token at a time, so when it computes a position, the later tokens do not exist yet. During training the whole text is available at once, and the same rule still hides later tokens. The rule that blocks later positions is called the <Term id="causal-mask">causal mask</Term>.
+
+## Weights decide how much to take
+
+For each position, attention computes one weight for every token that position may read. A weight is a share: how much of that token's vector goes into the blend.
+
+The weights follow two rules:
+
+1. Every weight is a positive number. Some can be very close to zero.
+2. The weights at one position add up to exactly 1.
+
+For "sat", the weights could be 0.1 for "The", 0.6 for "cat", and 0.3 for "sat". These numbers are made up for this example, and they add up: 0.1 + 0.6 + 0.3 = 1.
+
+<Note type="note" title="Where the weights come from">
+
+The model computes the weights from the tokens' vectors, using numbers it learned in training. A different sentence gives different weights. How the weights are computed is covered on a later page.
+
+</Note>
+
+<Figure caption="Weights choose a mixture of earlier vectors. The weights shown are an illustration, not a real GPT-2 head.">
+  <svg viewBox="0 0 600 270" width="100%" role="img" aria-label="Three token boxes: The, cat, sat. Arrows go from sat to The with weight 0.1, to cat with weight 0.6, and back to sat itself with weight 0.3. Below: new sat equals 0.1 times The plus 0.6 times cat plus 0.3 times sat.">
+    <defs>
+      <marker id="att-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+      </marker>
+    </defs>
+    <path d="M 470 150 C 420 20, 160 20, 115 146" fill="none" stroke="currentColor" strokeWidth="1.5" markerEnd="url(#att-arrow)" />
+    <path d="M 480 150 C 450 80, 340 80, 305 146" fill="none" stroke="currentColor" strokeWidth="4" markerEnd="url(#att-arrow)" />
+    <path d="M 505 150 C 505 90, 565 90, 552 146" fill="none" stroke="currentColor" strokeWidth="2.5" markerEnd="url(#att-arrow)" />
+    <text x="290" y="42" fontSize="16" textAnchor="middle" fill="currentColor">0.1</text>
+    <text x="394" y="86" fontSize="16" textAnchor="middle" fill="currentColor">0.6</text>
+    <text x="533" y="90" fontSize="16" textAnchor="middle" fill="currentColor">0.3</text>
+    <rect x="40" y="150" width="140" height="50" rx="6" fill="none" stroke="currentColor" strokeWidth="1.5" />
+    <rect x="230" y="150" width="140" height="50" rx="6" fill="none" stroke="currentColor" strokeWidth="1.5" />
+    <rect x="420" y="150" width="140" height="50" rx="6" fill="currentColor" fillOpacity="0.12" stroke="currentColor" strokeWidth="1.5" />
+    <text x="110" y="181" fontSize="18" textAnchor="middle" fill="currentColor">The</text>
+    <text x="300" y="181" fontSize="18" textAnchor="middle" fill="currentColor">cat</text>
+    <text x="490" y="181" fontSize="18" textAnchor="middle" fill="currentColor">sat</text>
+    <text x="110" y="222" fontSize="14" textAnchor="middle" fill="currentColor">position 1</text>
+    <text x="300" y="222" fontSize="14" textAnchor="middle" fill="currentColor">position 2</text>
+    <text x="490" y="222" fontSize="14" textAnchor="middle" fill="currentColor">position 3</text>
+    <text x="300" y="258" fontSize="16" textAnchor="middle" fill="currentColor">new sat = 0.1 × The + 0.6 × cat + 0.3 × sat</text>
+  </svg>
+</Figure>
+
+## The result is a mixture of vectors
+
+Each token offers a vector to be read, called its value vector. In a real model the value vector is computed from the token's vector. This page treats the value vectors as given.
+
+The output of attention at a position is a weighted sum of value vectors. Multiply each value vector by its weight, then add the results number by number.
+
+Mixing paint is a fair comparison. A quarter of a red tin plus three quarters of a blue tin gives a paint that is mostly blue with some red. The comparison stops there: attention mixes lists of numbers, and it computes fresh shares for every position in every sentence.
+
+Here is a small example with two-number vectors. Take only the first two tokens, "The cat". The token "cat" may read "The" and itself. Suppose:
+
+- the value vector for "The" is (1, 0)
+- the value vector for "cat" is (0, 1)
+- the weight on "The" is 0.25 and the weight on "cat" is 0.75
+
+Work out each number of the result separately:
+
+1. First number: 0.25 × 1 + 0.75 × 0 = 0.25
+2. Second number: 0.25 × 0 + 0.75 × 1 = 0.75
+
+The new vector for "cat" is (0.25, 0.75). It is mostly "cat", with a quarter of "The" mixed in. Real vectors have many more numbers, and every number is mixed in this same way.
+
+The code below does the same two steps: it multiplies each vector by its weight and adds the results number by number.
+
+```python
+weights = [0.25, 0.75]
+vectors = [[1, 0], [0, 1]]
+
+result = [0, 0]
+for w, v in zip(weights, vectors):
+    for i in range(len(result)):
+        result[i] += w * v[i]
+
+print(result)
+# [0.25, 0.75]
+```
+
+One set of these weights and value vectors is called a <Term id="attention-head">head</Term>. A real model runs several heads side by side. A later page covers how they are combined.
+
+## That mixture moves information forward
+
+Before attention, the vector at "sat" held information about "sat" only. After attention, it also holds a large share of the value vector from "cat" and a small share from "The". Information has moved from earlier positions to a later one.
+
+It only moves forward. "The" never takes anything from "sat", because "sat" comes later.
+
+This is what next-token prediction needs. The model predicts the next token from the vector at the last position, so that vector must carry information from the whole prompt, and attention is the step that puts it there.

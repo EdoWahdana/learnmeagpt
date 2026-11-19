@@ -1,0 +1,24 @@
+---
+title: Tokenizer
+description: "The tool encodes text with the GPT-2 tokenizer and shows the token strings and ids."
+updated: 2026-11-19
+---
+
+import { Tokenizer } from "@/components/tools/Tokenizer"
+
+This tool splits your text into GPT-2 <Term id="tokens">tokens</Term> and shows each token’s text and its id number.
+
+The splitting runs in your browser, and the text is not sent anywhere.
+
+<Tokenizer />
+
+The Python below shows the same call with the `tiktoken` library. It is the same GPT-2 mapping from text to ids as the browser tool, not a second algorithm, so it gives the same ids for the same sentence.
+
+```python
+import tiktoken
+
+enc = tiktoken.get_encoding("gpt2")
+ids = enc.encode("A cat sat on the mat.")
+print(ids)              # [32, 3797, 3332, 319, 262, 2603, 13]
+print(enc.decode(ids))  # A cat sat on the mat.
+```

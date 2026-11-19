@@ -1,0 +1,117 @@
+---
+title: Vectors
+description: A vector is an ordered list of numbers. The dot product multiplies matching positions and adds those products.
+updated: 2026-11-19
+---
+
+import { VectorDotProduct } from "@/components/tools/VectorDotProduct";
+
+A **vector** is an ordered list of numbers, such as (1, 2, 3). The <Term id="dot-product">dot product</Term> combines two vectors into a single number: multiply the numbers that sit in matching positions, then add those products together.
+
+Each number in a vector sits in a numbered slot called a position. The number of positions is the vector's length, also called its dimension. The vector (1, 2, 3) has length 3: the first position holds 1, the second holds 2, and the third holds 3.
+
+A shopping list with fixed slots is a useful picture. If the slots are always apples, bread, and milk, then (1, 2, 3) means 1 apple, 2 loaves, and 3 bottles. The picture stops being true in one way: the positions in a model's vectors have no names like "apples". They are only numbered slots.
+
+## Order matters
+
+(1, 2) and (2, 1) contain the same two numbers, but they are different vectors. In the shopping list, the first means 1 apple and 2 loaves. The second means 2 apples and 1 loaf.
+
+Two vectors are equal only when they have the same length and every position holds the same number. Moving a number to another position makes a different vector.
+
+## Addition and scaling stay in the list
+
+To add two vectors, they must have the same length. You add them position by position. Here is (1, 2, 3) plus (4, 5, 6):
+
+1. Add the first positions: 1 + 4 = 5.
+2. Add the second positions: 2 + 5 = 7.
+3. Add the third positions: 3 + 6 = 9.
+
+The result is (5, 7, 9). It is still a vector, and it still has length 3.
+
+Scaling means multiplying every position by the same single number. Scaling (1, 2, 3) by 2 gives (1 × 2, 2 × 2, 3 × 2) = (2, 4, 6). Again the result is a vector of the same length. Only the size of each number changed.
+
+## The dot product is one number
+
+The dot product also pairs up matching positions, but it ends with a single number instead of a list. Here is the dot product of (1, 2, 3) and (4, 5, 6):
+
+1. Pair the positions: 1 with 4, 2 with 5, 3 with 6.
+2. Multiply each pair: 1 × 4 = 4, 2 × 5 = 10, 3 × 6 = 18.
+3. Add the products: 4 + 10 + 18 = 32.
+
+Written on one line: 1 × 4 + 2 × 5 + 3 × 6 = 4 + 10 + 18 = 32.
+
+<Figure caption="The dot product pairs positions and adds.">
+  <svg viewBox="0 0 600 310" width="100%" role="img" aria-label="Two columns of three cells. The first column holds 1, 2, 3 and the second holds 4, 5, 6. Each pair in the same row is joined and multiplied, giving 4, 10, and 18. The products add up to 32.">
+    <defs>
+      <marker id="vectors-dot-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+      </marker>
+    </defs>
+    <g fill="currentColor" fontSize="16" textAnchor="middle">
+      <text x="110" y="34">First</text>
+      <text x="280" y="34">Second</text>
+      <text x="460" y="34">Product</text>
+    </g>
+    <g fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="80" y="50" width="60" height="50" rx="4" />
+      <rect x="80" y="110" width="60" height="50" rx="4" />
+      <rect x="80" y="170" width="60" height="50" rx="4" />
+      <rect x="250" y="50" width="60" height="50" rx="4" />
+      <rect x="250" y="110" width="60" height="50" rx="4" />
+      <rect x="250" y="170" width="60" height="50" rx="4" />
+    </g>
+    <g stroke="currentColor" strokeWidth="1.5">
+      <line x1="140" y1="75" x2="250" y2="75" />
+      <line x1="140" y1="135" x2="250" y2="135" />
+      <line x1="140" y1="195" x2="250" y2="195" />
+      <line x1="310" y1="75" x2="418" y2="75" markerEnd="url(#vectors-dot-arrow)" />
+      <line x1="310" y1="135" x2="418" y2="135" markerEnd="url(#vectors-dot-arrow)" />
+      <line x1="310" y1="195" x2="418" y2="195" markerEnd="url(#vectors-dot-arrow)" />
+    </g>
+    <g fill="currentColor" fontSize="18" textAnchor="middle" dominantBaseline="central">
+      <text x="110" y="75">1</text>
+      <text x="110" y="135">2</text>
+      <text x="110" y="195">3</text>
+      <text x="280" y="75">4</text>
+      <text x="280" y="135">5</text>
+      <text x="280" y="195">6</text>
+      <text x="460" y="75">4</text>
+      <text x="460" y="135">10</text>
+      <text x="460" y="195">18</text>
+    </g>
+    <g fill="currentColor" fontSize="15" textAnchor="middle">
+      <text x="195" y="67">×</text>
+      <text x="195" y="127">×</text>
+      <text x="195" y="187">×</text>
+    </g>
+    <line x1="420" y1="230" x2="500" y2="230" stroke="currentColor" strokeWidth="1.5" />
+    <text x="300" y="280" fill="currentColor" fontSize="18" textAnchor="middle">Sum: 4 + 10 + 18 = 32</text>
+  </svg>
+</Figure>
+
+<VectorDotProduct />
+
+A shopping bill is a dot product. If (1, 2, 3) is how many of each item you buy and (4, 5, 6) is the price of each item in coins, the bill is 32 coins. The comparison stops at signs: prices are never negative, but numbers in a model's vectors can be, so a dot product can come out negative or zero.
+
+The dot product is larger when both vectors have large numbers in the same positions. When the big numbers sit in different positions, it is small. For example, (1, 0) and (0, 1) have a dot product of 1 × 0 + 0 × 1 = 0.
+
+The code below does the same three steps. It walks along both lists together, multiplies each pair, and keeps a running total.
+
+```python
+def dot(a, b):
+    # Walk along both lists together.
+    total = 0
+    for x, y in zip(a, b):
+        # Multiply the pair in this position and add it to the running total.
+        total += x * y
+    return total
+
+print(dot([1, 2, 3], [4, 5, 6]))
+# prints: 32
+```
+
+## A long vector can store a token
+
+A token is a piece of text, such as a word or part of a word, that a model reads as one unit. GPT-2 small stores each token as a vector of length 768. That is a list of 768 numbers. A vector that stands for a token is called an <Term id="text-becomes-numbers">embedding</Term>.
+
+Nothing about the rules changes at length 768. Adding two embeddings still means 768 additions, one per position. Their dot product still pairs the positions, now 768 multiplications, and adds the products into one number.

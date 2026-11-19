@@ -1,0 +1,96 @@
+---
+title: Using a chatbot
+description: A chatbot sends the conversation so far to a model and appends the model’s new tokens to that conversation.
+updated: 2026-11-19
+---
+
+A **chatbot** sends the conversation so far to a model and appends the model’s new tokens to that conversation. Each time you press send, the whole conversation goes in, and the reply is added to the end of it.
+
+The model underneath is the same kind described on the previous page. The chatbot is the program that keeps the conversation and passes it along.
+
+## The window holds a transcript
+
+A **transcript** is the written record of the conversation: an ordered list of messages, oldest first. Here is a short one.
+
+1. **user:** What is the capital of France?
+2. **assistant:** Paris.
+3. **user:** And of Italy?
+
+The third message only makes sense because the first two are still in the list. "And of Italy?" does not say what is being asked. The transcript does.
+
+When the model answers, its reply becomes message 4. The newest reply is not stored somewhere separate. It is more tokens added to the end of the same list.
+
+## Roles label the messages
+
+Each message in the transcript carries a label that says who it is from. Chat APIs commonly use three labels. (An API is the way one program sends requests to another.)
+
+- **system:** instructions placed at the start by the product, before you type anything. You often cannot see them.
+- **user:** what you type.
+- **assistant:** what the model generated earlier in the conversation.
+
+These labels are text in the transcript. They are not three separate models. One model reads all of it. Before sending, the product writes the whole transcript out as one long piece of text, with the labels as markers. A simplified version looks like this:
+
+```text
+system: Answer briefly.
+user: What is the capital of France?
+assistant: Paris.
+user: And of Italy?
+assistant:
+```
+
+<Note type="note">
+
+The exact markers differ between products. The idea is the same: the text ends right where the next assistant message should begin.
+
+</Note>
+
+## The model still only continues tokens
+
+After the product packs the transcript into one piece of text, the text is split into <Term id="tokens">tokens</Term>. The model then runs the same loop as on the previous page, <Term id="how-a-gpt-works">next-token prediction</Term>:
+
+1. Work out a chance for every possible next token.
+2. Choose one token.
+3. Add it to the end.
+4. Repeat until an end token or a length limit is reached.
+
+In the example above, the text ends with "assistant:", so tokens like "Rome" get a high chance. The model is not answering a question in any special mode. It is continuing a piece of text that happens to be shaped like a conversation.
+
+The model itself keeps nothing between replies. The earlier messages reach it because they are part of the transcript that is sent again.
+
+Compare it to passing someone a whole thread of letters each time and asking for the next letter. The comparison stops there: the model does not read like a person. It computes chances for the next token.
+
+## A reply is appended, then the loop can run again
+
+One full turn of a conversation goes like this:
+
+1. You type a message. The product adds it to the transcript as a user message.
+2. The product packs the whole transcript and sends it to the model.
+3. The model generates new tokens, one at a time.
+4. The product adds those tokens to the transcript as an assistant message and shows them to you.
+5. Your next message is added after the assistant tokens, and the whole cycle starts again from step 2.
+
+So the transcript grows with every turn. The model receives a longer piece of text each time, and continues it in the same way.
+
+<Figure caption="The transcript is the model’s input">
+<svg viewBox="0 0 600 280" width="100%" role="img" aria-label="Three stacked rows labeled system, user, and assistant form the transcript. An arrow goes from the rows into a box labeled model. An arrow labeled new tokens comes back from the model onto a new assistant row below the others.">
+  <defs>
+    <marker id="arrow-using-a-chatbot" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+    </marker>
+  </defs>
+  <text x="20" y="26" fontSize="16" fill="currentColor">Transcript</text>
+  <rect x="20" y="40" width="260" height="40" rx="6" fill="none" stroke="currentColor" strokeWidth="2" />
+  <text x="36" y="66" fontSize="16" fill="currentColor">system</text>
+  <rect x="20" y="90" width="260" height="40" rx="6" fill="none" stroke="currentColor" strokeWidth="2" />
+  <text x="36" y="116" fontSize="16" fill="currentColor">user</text>
+  <rect x="20" y="140" width="260" height="40" rx="6" fill="none" stroke="currentColor" strokeWidth="2" />
+  <text x="36" y="166" fontSize="16" fill="currentColor">assistant</text>
+  <rect x="20" y="220" width="260" height="40" rx="6" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="6 5" />
+  <text x="36" y="246" fontSize="16" fill="currentColor">assistant (new)</text>
+  <rect x="400" y="80" width="170" height="60" rx="8" fill="none" stroke="currentColor" strokeWidth="2" />
+  <text x="485" y="116" textAnchor="middle" fontSize="16" fill="currentColor">Model</text>
+  <line x1="290" y1="110" x2="394" y2="110" stroke="currentColor" strokeWidth="2" markerEnd="url(#arrow-using-a-chatbot)" />
+  <path d="M 485 140 V 240 H 287" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" markerEnd="url(#arrow-using-a-chatbot)" />
+  <text x="385" y="230" textAnchor="middle" fontSize="15" fill="currentColor">new tokens</text>
+</svg>
+</Figure>
