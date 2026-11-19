@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { EntryList } from "@/components/article/EntryList";
 import { curriculum, groups, type Entry } from "@/content/curriculum";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Map",
-  description: "Every page, including titles that are not written yet.",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Map of every page",
+  description: "Every page on learn me a gpt, grouped by section, including titles that are not written yet.",
+  path: "/map",
+});
 
 function listed(entries: Entry[]) {
   return entries

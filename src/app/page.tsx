@@ -1,6 +1,23 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { JsonLd } from "@/components/JsonLd";
 import { LogoMark } from "@/components/shell/Logo";
 import { curriculum, getByRoute } from "@/content/curriculum";
+import { siteDescription, siteName, siteUrl } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
+
+const websiteData = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: siteName,
+  alternateName: ["learnmeagpt", "Learn Me a GPT"],
+  url: siteUrl,
+  description: siteDescription,
+  inLanguage: "en",
+};
 
 const sections = [
   { route: "/beginners", summary: "The reading order, in plain language." },
@@ -16,6 +33,7 @@ export default function Home() {
 
   return (
     <div className="home">
+      <JsonLd data={websiteData} />
       <section className="home-hero">
         <LogoMark size={48} />
         <h1>How GPT models work, one token at a time</h1>

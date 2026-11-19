@@ -1,8 +1,48 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { neighbors, type Entry } from "@/content/curriculum";
+import { JsonLd } from "@/components/JsonLd";
+import { getByRoute, neighbors, type Entry } from "@/content/curriculum";
+import { absoluteUrl, siteName, siteUrl } from "@/lib/seo";
 import { ArticleSidebar, SectionPagesDisclosure, sectionPages } from "./ArticleSidebar";
 import { TableOfContents } from "./TableOfContents";
+
+function articleData(entry: Entry, updated?: string) {
+  const site = { "@type": "Organization", name: siteName, url: siteUrl };
+  const sectionIndex = getByRoute(`/${entry.section}`);
+  const trail = [
+    { name: siteName, url: siteUrl },
+    ...(sectionIndex && sectionIndex.id !== entry.id && sectionIndex.status === "ready"
+      ? [{ name: sectionIndex.title, url: absoluteUrl(sectionIndex.route) }]
+      : []),
+    { name: entry.title, url: absoluteUrl(entry.route) },
+  ];
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Article",
+        headline: entry.title,
+        description: entry.description,
+        url: absoluteUrl(entry.route),
+        mainEntityOfPage: absoluteUrl(entry.route),
+        inLanguage: "en",
+        isAccessibleForFree: true,
+        ...(updated ? { dateModified: updated } : {}),
+        author: site,
+        publisher: site,
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: trail.map((item, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name: item.name,
+          item: item.url,
+        })),
+      },
+    ],
+  };
+}
 
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -44,6 +84,7 @@ export function Article({
 
   return (
     <div className={hasSidebar ? "article-layout has-sidebar" : "article-layout"}>
+      <JsonLd data={articleData(entry, updated)} />
       {hasSidebar ? <ArticleSidebar entry={entry} pages={pages} /> : null}
       <article className="article">
         {hasSidebar ? <SectionPagesDisclosure entry={entry} pages={pages} /> : null}

@@ -4,6 +4,7 @@ import { Article } from "@/components/article/Article";
 import { getByRoute } from "@/content/curriculum";
 import { articleContent } from "@/content/registry/article";
 import { toolPages } from "@/content/registry/tools";
+import { entryMetadata } from "@/lib/seo";
 
 type Params = { slug: string };
 
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   if (!entry || !toolPages[slug]) {
     return {};
   }
-  return { title: entry.title, description: entry.description };
+  return entryMetadata(entry, articleContent(toolPages[slug]).updated);
 }
 
 export default async function ToolPage({ params }: { params: Promise<Params> }) {

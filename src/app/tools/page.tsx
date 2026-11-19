@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { EntryList } from "@/components/article/EntryList";
 import { curriculum } from "@/content/curriculum";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Tools",
-  description: "These calculators run in the browser. The input is not sent anywhere.",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Interactive GPT tools",
+  description:
+    "Free in-browser tools: a GPT-2 tokenizer, a softmax calculator, a temperature sampler, and a vector dot product. The input is not sent anywhere.",
+  path: "/tools",
+});
 
 export default function ToolsIndex() {
   const entries = curriculum

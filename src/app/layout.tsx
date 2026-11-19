@@ -4,6 +4,7 @@ import { Source_Serif_4, Source_Sans_3, Source_Code_Pro } from "next/font/google
 import { Footer } from "@/components/shell/Footer";
 import { Header } from "@/components/shell/Header";
 import { ThemeBoot, themeInitScript } from "@/components/shell/ThemeBoot";
+import { siteDescription, siteName, siteTagline, siteUrl } from "@/lib/seo";
 import "./globals.css";
 
 const sourceSerif4 = Source_Serif_4({
@@ -25,12 +26,41 @@ const sourceCodePro = Source_Code_Pro({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
-    default: "learn me a gpt",
-    template: "%s · learn me a gpt",
+    default: `${siteName} · ${siteTagline}`,
+    template: `%s · ${siteName}`,
   },
-  description:
-    "Explanations of how GPT-style language models work, from tokens to a GPT-2 forward pass.",
+  description: siteDescription,
+  applicationName: siteName,
+  keywords: [
+    "how GPT works",
+    "how ChatGPT works",
+    "GPT explained",
+    "large language models explained",
+    "LLM for beginners",
+    "transformer explained",
+    "attention mechanism",
+    "tokens and tokenizer",
+    "embeddings",
+    "softmax",
+    "temperature",
+    "GPT-2",
+  ],
+  category: "education",
+  openGraph: {
+    type: "website",
+    siteName,
+    locale: "en_US",
+    url: "/",
+    title: `${siteName} · ${siteTagline}`,
+    description: siteDescription,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${siteName} · ${siteTagline}`,
+    description: siteDescription,
+  },
 };
 
 export default function RootLayout({
