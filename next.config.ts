@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 import createMDX from "@next/mdx";
 
 const nextConfig: NextConfig = {
+  // Static HTML in `out/`, served by Cloudflare without a server.
+  output: "export",
   pageExtensions: ["ts", "tsx", "md", "mdx"],
 };
 

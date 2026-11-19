@@ -25,6 +25,7 @@ Assign work in the order below. A session can start when every file in its `Depe
 - Short Python is shown on calculation pages. Interactive toys run in the browser and do not send the input anywhere.
 - v1 is the foundation sessions, the Beginners pages, and four toys. Later sessions are specified now and are built only when assigned.
 - One session, one feature file.
+- The site is a static export (`output: "export"`) deployed to Cloudflare from `out/` via `wrangler.jsonc`. Every dynamic route must generate at least one page at build time. The technical route is parked at `src/app/_technical/` (the `_` prefix keeps it out of routing) until the first technical page exists. The first technical session renames it back to `src/app/technical/`.
 
 ## Voice
 

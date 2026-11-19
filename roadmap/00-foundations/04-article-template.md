@@ -113,3 +113,4 @@ Checked with two temporary beginner pages and one temporary technical page, then
 Register a page as the module, not only the default export: `import * as page from "...mdx"` then `beginnerPages[slug] = page` or `technicalPages["group/slug"] = page`. YAML frontmatter is exported as `frontmatter` through `remark-frontmatter` and `remark-mdx-frontmatter`. `updated: 2026-11-17` renders as `17 Nov 2026`. An `author` field is ignored. Title and description on the page come from the curriculum entry.
 
 `neighbors` was already exported by the manifest, so this session did not add `src/lib/neighbors.ts`.
+- 2026-11-19: for the static export, `src/app/technical/` was renamed to `src/app/_technical/`, because an export cannot build a dynamic route with zero pages. The first technical page session renames it back.

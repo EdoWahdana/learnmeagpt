@@ -1,0 +1,4 @@
+node_modules
+.next
+roadmap
+package-lock.json
