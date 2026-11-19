@@ -402,98 +402,87 @@ main.shell-column {
   margin-top: var(--space-6);
   background: var(--bg-elevated);
   border-top: 1px solid var(--border);
-  box-shadow: inset 0 3px 0 var(--accent);
 }
 
 .footer-inner {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
-  gap: var(--space-4) var(--space-6);
-  padding-block: var(--space-5);
-}
-
-.footer-brand {
-  max-width: 24rem;
+  align-items: center;
+  gap: 0.65rem 1.25rem;
+  padding-block: 0.85rem;
+  font-size: 0.875rem;
+  color: var(--fg-muted);
 }
 
 .footer-wordmark {
-  font-size: 1.0625rem;
-}
-
-.footer-brand p {
-  margin-top: var(--space-2);
-  color: var(--fg-muted);
   font-size: 0.9375rem;
-  line-height: 1.5;
 }
 
-.footer-brand p.footer-tribute {
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--border);
-  font-size: 0.875rem;
+.footer-tribute,
+.footer-contribute {
+  margin: 0;
+  line-height: 1.4;
 }
 
-.footer-tribute a,
-.home-tribute a {
+.footer-contribute {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+  margin-left: auto;
+}
+
+.footer-tribute a {
   color: var(--accent);
   text-decoration-color: var(--accent-line);
   text-underline-offset: 0.18em;
   transition: color 0.15s ease, text-decoration-color 0.15s ease;
 }
 
-.footer-tribute a:hover,
-.home-tribute a:hover {
+.footer-tribute a:hover {
   color: var(--accent-strong);
   text-decoration-color: currentColor;
 }
 
-.home-tribute a {
-  color: var(--accent-strong);
+.footer-github {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--fg);
   font-weight: 600;
+  text-decoration: none;
+}
+
+.footer-github:hover {
+  color: var(--accent-strong);
+}
+
+.footer-github-icon {
+  flex-shrink: 0;
+}
+
+.home-tribute a {
+  color: var(--note-title);
+  font-weight: 600;
+  text-decoration-color: var(--note-border);
+  text-underline-offset: 0.18em;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
 }
 
 .home-tribute a:hover {
   color: var(--fg);
+  text-decoration-color: currentColor;
 }
 
 .home-tribute {
   margin-top: var(--space-5);
   padding: var(--space-3);
+  border: 1px solid var(--note-border);
   border-radius: 10px;
-  background: var(--accent-soft);
-  border-left: 4px solid var(--accent);
+  background: var(--note-bg);
   font-family: var(--font-serif), Georgia, serif;
   font-size: 1.0625rem;
   line-height: 1.6;
-}
-
-.footer-links {
-  display: flex;
-  gap: var(--space-6);
-}
-
-.footer-heading {
-  margin-bottom: var(--space-1);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--fg-muted);
-}
-
-.footer-links ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.footer-links li + li {
-  margin-top: 6px;
-}
-
-.footer-links a {
-  font-size: 0.9375rem;
 }
 
 .menu-toggle {
@@ -580,10 +569,6 @@ html[data-theme="light"] .label-for-dark {
   padding: 6px 0 6px var(--space-2);
   border-left: 2px solid var(--border);
   color: var(--fg-muted);
-}
-
-.article-sidebar li a,
-.article-pages-narrow li a {
   transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
 }
 
@@ -998,22 +983,12 @@ a.home-card:hover .home-card-title {
   margin: var(--space-6) 0 var(--space-2);
 }
 
-.prose h2::before {
-  content: "";
-  display: block;
-  width: 2.5rem;
-  height: 3px;
-  margin-bottom: var(--space-2);
-  border-radius: 2px;
-  background: var(--accent);
-}
-
 /* Note boxes: asides that sit outside the main line of the explanation. */
 .note {
   margin: var(--space-4) 0;
   padding: var(--space-2) var(--space-3);
-  border-left: 4px solid var(--note-border);
-  border-radius: 0 8px 8px 0;
+  border: 1px solid var(--note-border);
+  border-radius: 8px;
   background: var(--note-bg);
   font-size: 1.0625rem;
   line-height: 1.6;
@@ -1046,7 +1021,7 @@ a.home-card:hover .home-card-title {
 }
 
 .note-tip {
-  border-left-color: var(--tip-border);
+  border-color: var(--tip-border);
   background: var(--tip-bg);
 }
 
@@ -1055,7 +1030,7 @@ a.home-card:hover .home-card-title {
 }
 
 .note-warning {
-  border-left-color: var(--warning-border);
+  border-color: var(--warning-border);
   background: var(--warning-bg);
 }
 
@@ -1074,7 +1049,6 @@ a.home-card:hover .home-card-title {
   padding: var(--space-3);
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-top: 3px solid var(--accent);
   border-radius: 8px;
   font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 1rem;
